@@ -77,7 +77,7 @@ def main():
         print("Telegram通知傳送成功。")
 
     else:
-        print("降雨機率未超過60%，不傳送通知。")
+        print("降雨機率未超過20%，不傳送通知。")
 
 
 if __name__ == "__main__":
