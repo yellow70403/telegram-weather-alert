@@ -72,9 +72,9 @@ def main():
             message += "\n\n本訊息為手動測試。"
 
         send_telegram(message)
-       print("Telegram通知傳送成功。")
+    print("Telegram通知傳送成功。")
     else:
-        print("降雨機率未超過60%，本次不傳送通知。")
+    print("降雨機率未超過60%，本次不傳送通知。")
 
 
 if __name__ == "__main__":
