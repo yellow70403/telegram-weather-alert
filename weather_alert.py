@@ -1,18 +1,14 @@
 import os
 import requests
 
-# 地點設定（桃園市）
+
 LOCATION_NAME = "桃園市"
 LATITUDE = 24.9937
 LONGITUDE = 121.3010
-
-# 降雨機率門檻
 RAIN_THRESHOLD = 60
 
 
 def get_weather():
-    """取得今日最高降雨機率"""
-
     url = "https://api.open-meteo.com/v1/forecast"
 
     params = {
@@ -23,22 +19,29 @@ def get_weather():
         "forecast_days": 1
     }
 
-    response = requests.get(url, params=params, timeout=30)
+    response = requests.get(
+        url,
+        params=params,
+        timeout=30
+    )
+
     response.raise_for_status()
 
     data = response.json()
 
-    forecast_date = data["daily"]["time"][0]
-    rain_probability = data["daily"]["precipitation_probability_max"][0]
+    date = data["daily"]["time"][0]
+    rain = data["daily"]["precipitation_probability_max"][0]
 
-    return forecast_date, rain_probability
+    return date, rain
 
 
 def send_telegram(message):
-    """傳送 Telegram 通知"""
 
     bot_token = os.environ["TELEGRAM_BOT_TOKEN"]
     chat_id = os.environ["TELEGRAM_CHAT_ID"]
+
+    print("正在傳送 Telegram...")
+    print("Chat ID 已取得")
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
 
@@ -51,33 +54,35 @@ def send_telegram(message):
         timeout=30
     )
 
+    print("Telegram HTTP 狀態碼：", response.status_code)
+    print("Telegram 回應：", response.text)
+
     response.raise_for_status()
 
 
 def main():
 
-    forecast_date, rain_probability = get_weather()
+    date, rain = get_weather()
 
-    print(f"日期：{forecast_date}")
+    print("========== 天氣資料 ==========")
+    print(f"日期：{date}")
     print(f"地點：{LOCATION_NAME}")
-    print(f"最高降雨機率：{rain_probability}%")
+    print(f"降雨機率：{rain}%")
+    print("==============================")
 
-    if rain_probability >= RAIN_THRESHOLD:
 
-        message = (
-            "☔ 今日下雨提醒\n\n"
-            f"日期：{forecast_date}\n"
-            f"地點：{LOCATION_NAME}\n"
-            f"最高降雨機率：{rain_probability}%\n\n"
-            "記得帶傘喔！"
-        )
+    # 強制測試 Telegram
+    message = (
+        "☔ Telegram 測試通知\n\n"
+        f"日期：{date}\n"
+        f"地點：{LOCATION_NAME}\n"
+        f"目前降雨機率：{rain}%\n\n"
+        "如果你看到這則訊息，代表 Telegram Bot 已經成功連線！"
+    )
 
-        send_telegram(message)
+    send_telegram(message)
 
-        print("Telegram通知傳送成功。")
-
-    else:
-        print("降雨機率未超過20%，不傳送通知。")
+    print("Telegram 通知傳送成功！")
 
 
 if __name__ == "__main__":
